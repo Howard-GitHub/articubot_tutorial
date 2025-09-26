@@ -26,6 +26,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            "pose_subscriber_node = articubot_one.pose_subscriber:main"
         ],
     },
 )
