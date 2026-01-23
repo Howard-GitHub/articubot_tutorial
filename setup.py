@@ -26,6 +26,10 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            "test_twist_node = articubot_one.test_twist:main",
+            "odom_subscribe_node = articubot_one.odom_subscriber:main",
+            "pose_subscriber_node = articubot_one.pose_subscriber:main",
+            "orientation_tracker_node = articubot_one.orientation_tracker:main"
         ],
     },
 )
