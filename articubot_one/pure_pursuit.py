@@ -6,7 +6,7 @@ import math
 
 class OrientationTracker(Node):
     def __init__(self):
-        super().__init__("orientation_tracker")
+        super().__init__("pure_pursuit")
         self.pose_subscriber = self.create_subscription(PoseArray, '/world/empty/pose/info', self.outputOrientation, 10)
         self.cmd_vel_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
         self.linePath = [(0, 0), (1.448, 1.85)]
@@ -52,7 +52,7 @@ class OrientationTracker(Node):
         elif turn_angle < -180:
             turn_angle = turn_angle + 360
 
-        self.get_logger().info(f"turn angle: {turn_angle} | vehicle heading: {vehicle_heading}")
+        # self.get_logger().info(f"turn angle: {turn_angle} | vehicle heading: {vehicle_heading}")
 
         velocity_command = Twist() 
         velocity_command.linear.x = 0.5
