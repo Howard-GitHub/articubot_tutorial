@@ -34,7 +34,7 @@ class OrientationTracker(Node):
     def calculateTurnAngle(self, vehicle_heading, vehicleInfo):
         # target position dummy values (do not have this information yet as its needed from the line intersection method)
         targetX = 1.448
-        targetY = 1.85
+        targetY = -1.85
 
         # current vehicle position
         currentX = vehicleInfo.position.x
@@ -52,13 +52,13 @@ class OrientationTracker(Node):
         elif turn_angle < -180:
             turn_angle = turn_angle + 360
 
-        # self.get_logger().info(f"turn angle: {turn_angle} | vehicle heading: {vehicle_heading}")
+        self.get_logger().info(f"turn angle: {turn_angle} | vehicle heading: {vehicle_heading}")
 
-        velocity_command = Twist() 
-        velocity_command.linear.x = 0.5
-        velocity_command.angular.z = turn_angle * (2.0 / 180.0)
+        # velocity_command = Twist() 
+        # velocity_command.linear.x = 0.5
+        # velocity_command.angular.z = turn_angle * (2.0 / 180.0)
 
-        self.cmd_vel_publisher.publish(velocity_command)
+        # self.cmd_vel_publisher.publish(velocity_command)
 
 
 def main(args=None):

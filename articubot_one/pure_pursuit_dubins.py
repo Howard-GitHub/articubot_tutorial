@@ -136,7 +136,7 @@ class OrientationTracker(Node):
         super().__init__("pure_pursuit")
         self.pose_subscriber = self.create_subscription(PoseArray, '/world/empty/pose/info', self.outputOrientation, 10)
         self.cmd_vel_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
-        self.linePath = generate_dubins_path(x=0.0, y=0.0, theta=math.radians(90),R=1.0, xg=-0.1, yg=9.0, spacing=0.5)
+        self.linePath = generate_dubins_path(x=1.0, y=0.0, theta=math.radians(90),R=1.0, xg=-0.1, yg=-9.0, spacing=0.5)
         print(self.linePath)
         self.index = 1
         print("Current point:" + str(self.linePath[1]))
