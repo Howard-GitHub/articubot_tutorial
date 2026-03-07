@@ -39,6 +39,11 @@ class OrientationTracker(Node):
         self.line_circle_intersection(vehicleInfo.position, yaw_deg, [0, 0], [0, -4], 5)
         # self.get_logger().info(f"x={vehicleInfo.position.x}, y={vehicleInfo.position.y}")
         # self.calculateTurnAngle(yaw_deg, vehicleInfo)
+    
+    def pt_to_pt_distance(self, pt1, pt2):
+        x1, y1 = pt1
+        x2, y2 = pt2
+        return math.sqrt((x2-x1)**2 + (y2-y1)**2)
 
     def line_circle_intersection(self, currentPos, vehicle_heading, pt1, pt2, lookAheadDis):
         # currentX = currentPos[0]
@@ -84,12 +89,15 @@ class OrientationTracker(Node):
 
             # if (minX <= sol1[0] <= maxX and minY <= sol1[1] <= maxY) or (minX <= sol2[0] <= maxX and minY <= sol2[1] <= maxY):
             #     intersectFound = True
-            
+            intersections = []
+
             if (minX <= sol1[0] <= maxX and minY <= sol1[1] <= maxY):
+                intersections.append(sol1)
                 self.get_logger().info(f'solution 1 is valid! {sol1}')
 
             if (minX <= sol2[0] <= maxX and minY <= sol2[1] <= maxY):
                 self.get_logger().info(f'solution 2 is valid! {sol2}')
+                intersections.append(sol2)
 
             if (sol1[1] < sol2[1]):
                 self.calculateTurnAngle(vehicle_heading, currentPos, sol1)
@@ -98,6 +106,46 @@ class OrientationTracker(Node):
             
             self.get_logger().info(f'solution 1 {sol1}')
             self.get_logger().info(f'solution 2 {sol2}')
+
+            return intersections
+
+    def goal_pt_search(
+            self, path, currentPos, vehicle_heading, lookAheadDis, lastFoundIndex):
+        
+        currentX = currentPos.x
+        currentY = currentPos.y
+        goalpt = [None, None]
+
+        for i in range(lastFoundIndex, len(path)-1):
+
+            p1 = path[i]
+            p2 = path[i+1]
+
+            intersections = self.line_circle_intersection(
+                currentPos, vehicle_heading, p1, p2, lookAheadDis)
+            
+            if len(intersections) > 0:
+                
+                if len(intersections) == 2:
+                    if self.pt_to_pt_distance(intersections[0], p2) < self.pt_to_pt_distance(intersections[1], p2):
+                        goalpt = intersections[0]
+                    else:
+                        goalpt = intersections[1]
+                else:
+                    goalpt = intersections[0]
+            
+                if self.pt_to_pt_distance(goalpt, p2) < self.pt_to_pt_distance(currentPos, p2):
+                    lastFoundIndex = i
+                    break
+                else:
+                    lastFoundIndex = i+  1
+            
+            else:
+                goalpt = [path[lastFoundIndex][0], path[lastFoundIndex][1]]
+            
+        return goalpt, lastFoundIndex
+
+        
 
 
     def calculateTurnAngle(self, vehicle_heading, vehicleInfo, targetPoint):
