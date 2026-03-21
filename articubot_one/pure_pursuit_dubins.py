@@ -134,17 +134,24 @@ def generate_dubins_path(x, y, theta, R, xg, yg, spacing):
 class OrientationTracker(Node):
     def __init__(self):
         super().__init__("pure_pursuit")
-        self.pose_subscriber = self.create_subscription(PoseArray, '/world/empty/pose/info', self.outputOrientation, 10)
+        self.pose_subscriber = self.create_subscription(PoseArray, '/world/empty/pose/info', self.purePursuitDubins, 10)
         self.cmd_vel_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
-        self.linePath = generate_dubins_path(x=1.0, y=0.0, theta=math.radians(90),R=1.0, xg=-0.1, yg=-9.0, spacing=0.5)
-        print(self.linePath)
+        # self.linePath = generate_dubins_path(x=0.0, y=0.0, theta=math.radians(90),R=1.0, xg=-0.1, yg=-9.0, spacing=0.5)
+        self.linePath = []
         self.index = 1
-        print("Current point:" + str(self.linePath[1]))
+        self.generating_dubins_path = True
+        print(self.linePath)
+        # print("Current point:" + str(self.linePath[1]))
 
-    def outputOrientation(self, poseArray):
-        currentLookPoint = self.linePath[self.index]
-
+    def purePursuitDubins(self, poseArray):
         vehicleInfo = poseArray.poses[1]
+
+        if self.generating_dubins_path:
+            self.linePath = generate_dubins_path(x=vehicleInfo.position.x, y=vehicleInfo.position.y, theta=math.radians(-90),R=1.0, xg=-1.0, yg=-5.0, spacing=0.5)
+            print("Current point:" + str(self.linePath[1]))
+            self.generating_dubins_path = False
+
+        currentLookPoint = self.linePath[self.index]
 
         if (abs(currentLookPoint[0] - vehicleInfo.position.x) < 0.25) and (abs(currentLookPoint[1] - vehicleInfo.position.y) < 0.25):
             if (self.index == len(self.linePath) - 1):

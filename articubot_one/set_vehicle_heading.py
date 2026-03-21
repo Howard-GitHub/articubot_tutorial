@@ -39,7 +39,7 @@ class SetVehicleHeading(Node):
 
         self.get_logger().info(str(remaining_turn_angle))
 
-        if ((179.85 <= self.angle_orientation <= 180) or (-180 <= self.angle_orientation <= -179.0)) and ((0 <= remaining_turn_angle < 0.15) or (-360 < remaining_turn_angle < -359.0)):
+        if ((179.85 <= self.angle_orientation <= 180) or (-180 <= self.angle_orientation <= -179.0)) and ((0 <= remaining_turn_angle < 0.2) or (-360 < remaining_turn_angle < -350.0)):
             print("Reached target heading")
             velocity_cmd = Twist()
             velocity_cmd.angular.z = 0.0
