@@ -22,10 +22,10 @@ class LocalFrameConverter(Node):
         current_lat = data.data[0]
         current_lon = data.data[1]
 
-        dlat = current_lat - self.starting_lat
-        dlon = current_lon - self.starting_lon
+        dlat = math.radians(current_lat - self.starting_lat)
+        dlon = math.radians(current_lon - self.starting_lon)
 
-        x = dlon * math.cos(self.starting_lat) * self.R
+        x = dlon * math.cos(math.radians(self.starting_lat)) * self.R
         y = dlat * self.R
 
         self.get_logger().info(f"meters: ({x}, {y})")
