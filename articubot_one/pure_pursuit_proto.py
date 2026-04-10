@@ -11,16 +11,27 @@ def sgn(num):
     else:
         return -1
 
-class OrientationTracker(Node):
+class PurePursuitPrototype(Node):
     def __init__(self):
-        super().__init__("pure_pursuit")
-        self.pose_subscriber = self.create_subscription(PoseArray, '/world/empty/pose/info', self.outputOrientation, 10)
+        super().__init__("pure_pursuit_proto")
+        self.pose_subscriber = self.create_subscription(PoseArray, '/world/empty/pose/info', self.pure_pursuit_prototype, 10)
         self.cmd_vel_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
-        self.linePath = [(0, 0), (1.448, 1.85)]
+        self.line_path = [(0.0, 0.0), (1.0, -1.0), (0.0, -2.0), (1.0, -3.0), (0.0, -4.0)]
+        self.index = 0
 
 
-    def outputOrientation(self, poseArray):
+    def pure_pursuit_prototype(self, poseArray):
+        # Retrieve vehicle coordinates
         vehicleInfo = poseArray.poses[1]
+        current_position = [vehicleInfo.position.x, vehicleInfo.position.y]
+        previous_target = [0, 0]
+        target = [self.line_path[self.index][0], self.line_path[self.index][1]]
+        
+        if abs(target[0] - current_position[0]) <= 0.25 and abs(target[1] - current_position[1]) <= 0.25 and self.index < 4:
+            self.index += 1
+            previous_target = [self.line_path[self.index - 1][0], self.line_path[self.index - 1][1]]
+            target = [self.line_path[self.index][0], self.line_path[self.index][1]]
+            self.get_logger().info(f"index: {self.index}")
 
         # store quaternion values
         quaternion_value = [
@@ -46,13 +57,6 @@ class OrientationTracker(Node):
         return math.sqrt((x2-x1)**2 + (y2-y1)**2)
 
     def line_circle_intersection(self, currentPos, vehicle_heading, pt1, pt2, lookAheadDis):
-        # currentX = currentPos[0]
-        # currentY = currentPos[1]
-        # x1 = pt1[0]
-        # y1 = pt1[1]
-        # x2 = pt2[0]
-        # y2 = pt2[1]
-
         currentX = currentPos.x
         currentY = currentPos.y
         x1 = pt1[0]
@@ -68,7 +72,7 @@ class OrientationTracker(Node):
         y2_offset = y2 - currentY
 
         dx = x2_offset - x1_offset
-        dy = y2_offset = y1_offset
+        dy = y2_offset - y1_offset
         dr = math.sqrt(dx**2 + dy**2)
         D = np.linalg.det([[x1_offset, x2_offset], [y1_offset, y2_offset]])
         discriminant = (lookAheadDis**2) * (dr**2) - D**2
@@ -170,18 +174,24 @@ class OrientationTracker(Node):
         elif turn_angle < -180:
             turn_angle = turn_angle + 360
 
-        # self.get_logger().info(f"turn angle: {turn_angle} | vehicle heading: {vehicle_heading}")
+        if self.index < 4:
+            velocity_command = Twist() 
+            velocity_command.linear.x = 0.5
+            velocity_command.angular.z = turn_angle * (5.0 / 180.0)
+            self.cmd_vel_publisher.publish(velocity_command)
+        else:
+            velocity_command = Twist() 
+            velocity_command.linear.x = 0.0
+            velocity_command.angular.z = 0.0
+            self.cmd_vel_publisher.publish(velocity_command)
+            self.get_logger().info("Destination reached!")
+            
 
-        # velocity_command = Twist() 
-        # velocity_command.linear.x = 0.5
-        # velocity_command.angular.z = turn_angle * (2.0 / 180.0)
-
-        # self.cmd_vel_publisher.publish(velocity_command)
 
 
 def main(args=None):
     rclpy.init(args=args)
-    node = OrientationTracker()
+    node = PurePursuitPrototype()
     rclpy.spin(node)
     rclpy.shutdown()
 

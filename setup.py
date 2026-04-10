@@ -29,8 +29,11 @@ setup(
             "test_twist_node = articubot_one.test_twist:main",
             "odom_subscribe_node = articubot_one.odom_subscriber:main",
             "pose_subscriber_node = articubot_one.pose_subscriber:main",
-            "pure_pursuit_node = articubot_one.pure_pursuit:main",
-            "pure_pursuit_proto_node = articubot_one.pure_pursuit_proto:main"
+            "pure_pursuit_dubins_node = articubot_one.pure_pursuit_dubins:main",
+            "pure_pursuit_proto_node = articubot_one.pure_pursuit_proto:main",
+            "set_orientation_node = articubot_one.set_vehicle_heading:main",
+            "meters_coordinates_node = articubot_one.meters_coordinates:main",
+            "dumy_coordinates_publisher_node = articubot_one.dummy_coordinates_publisher:main"
         ],
     },
 )
